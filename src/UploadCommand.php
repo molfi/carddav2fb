@@ -27,10 +27,11 @@ class UploadCommand extends Command
         $this->loadConfig($input);
 
         $filename = $input->getArgument('filename');
-        $xml = file_get_contents($filename);
+        $XMLPhonebookStr = file_get_contents($filename);
+        $XMLPhonebook = simplexml_load_string($XMLPhonebookStr);
 
         error_log("Uploading Fritz!Box phonebook");
-        upload($xml, $this->config);
+        upload($XMLPhonebook, $this->config);
         error_log("Successful uploaded new Fritz!Box phonebook");
     }
 }
