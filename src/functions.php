@@ -369,9 +369,14 @@ function uploadPhonebook(SimpleXMLElement $xmlNewPhonebook, array $config)
     $fritz->mergeClientOptions($options['http'] ?? []);
     $fritz->login();
 
-    $XMLOldPhoneBook = downloadPhonebook($fritz, $config);
-    $oldSpecialAttributes = getPhoneNumberAttributes($XMLOldPhoneBook);
-    $xmlNewPhonebook = mergePhoneNumberAttributes($xmlNewPhonebook, $oldSpecialAttributes);
+    if (!phoneNumberAttributesSet($xmlNewPhonebook)) {
+        $XMLOldPhoneBook = downloadPhonebook($fritz, $config);
+        $oldSpecialAttributes = getPhoneNumberAttributes($XMLOldPhoneBook);
+        $xmlNewPhonebook = mergePhoneNumberAttributes($xmlNewPhonebook, $oldSpecialAttributes);
+    } else {
+        error_log("Note: Skipping automatic restore of quickdial/vanity attributes.");
+        error_log("      Are you using X-FB-QUICKDIAL/X-FB-VANITY CardDav extensions?");
+    }
 
     $formfields = [
         'PhonebookId' => $config['phonebook']['id']
@@ -486,4 +491,27 @@ function mergePhoneNumberAttributes(SimpleXMLElement $xmlTargetPhoneBook, array 
 function generateUniqueKey(string $number, string $carddav_uid)
 {
     return preg_replace("/[^\+0-9]/", "", $number)."@".$carddav_uid;
+}
+
+
+/**
+ * Check if special attributes already set (e.g., via CardDav extension 'X-FB-QUICKDIAL' / 'X-FB-VANITY')
+ *
+ * @param   SimpleXMLElement    $xmlPhonebook
+ * @return  boolean             true if any element already has a special attribute set
+ */
+function phoneNumberAttributesSet(SimpleXMLElement $xmlPhonebook)
+{
+    if (!property_exists($xmlPhonebook, "phonebook")) {
+        return false;
+    }
+    foreach ($xmlPhonebook->phonebook->contact as $contact) {
+        foreach ($contact->telephony->number as $number) {
+            if (property_exists($number->attributes(), "quickdial")
+                || property_exists($number->attributes(), "vanity")) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
