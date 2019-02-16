@@ -370,7 +370,7 @@ function uploadPhonebook(SimpleXMLElement $xmlNewPhonebook, array $config)
     $fritz->login();
 
     $XMLOldPhoneBook = downloadPhonebook($fritz, $config);
-    $oldSpecialAttributes = getOldSpecialAttributes($XMLOldPhoneBook);
+    $oldSpecialAttributes = getPhoneNumberAttributes($XMLOldPhoneBook);
     $xmlNewPhonebook = mergePhoneNumberAttributes($xmlNewPhonebook, $oldSpecialAttributes);
 
     $formfields = [
@@ -422,7 +422,7 @@ function downloadPhonebook(Api $fritz, array $config)
  * @param   SimpleXMLElement    $xmlPhonebook
  * @return  array               [] or map with {phonenumber@CardDavUID}=>SimpleXMLElement-Attributes
  */
-function getOldSpecialAttributes(SimpleXMLElement $xmlPhonebook)
+function getPhoneNumberAttributes(SimpleXMLElement $xmlPhonebook)
 {
     if (!property_exists($xmlPhonebook, "phonebook")) {
         return [];
