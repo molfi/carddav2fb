@@ -387,7 +387,7 @@ function upload(SimpleXMLElement $XMLNewPhonebook, array $config)
 
     $result = $fritz->postFile($formfields, $filefields); // send the command to store new phonebook
     if (strpos($result, 'Das Telefonbuch der FRITZ!Box wurde wiederhergestellt') === false) {
-       throw new \Exception('Upload failed');
+        throw new \Exception('Upload failed');
     }
 }
 
@@ -397,19 +397,19 @@ function upload(SimpleXMLElement $XMLNewPhonebook, array $config)
  *
  * @param   Api   $fritz
  * @param   array $config
- * @return  mixed false or SimpleXMLElement with the old phonebook
+ * @return  SimpleXMLElement with the old phonebook
  */
 function getOldPhonebook(Api $fritz, array $config)
 {
-    $formfields = array(
+    $formfields = [
         'PhonebookId' => $config['phonebook']['id'],
         'PhonebookExportName' => $config['phonebook']['name'],
         'PhonebookExport' => "",
-    );
+    ];
     $result = $fritz->postFile($formfields, []); // send the command to load existing phone book
     if (substr($result, 0, 5) !== "<?xml") {
         error_log("ERROR: Could not load old phonebook with ID=".$config['phonebook']['id']);
-        return false;
+        return new SimpleXMLElement("<xml><empty /></xml>");;
     }
     $XMLPhonebook = simplexml_load_string($result);
     return $XMLPhonebook;
@@ -422,22 +422,22 @@ function getOldPhonebook(Api $fritz, array $config)
  * @param   SimpleXMLElement    $XMLPhonebook
  * @return  array               [] or map with {phonenumber@CardDavUID}=>SimpleXMLElement-Attributes
  */
-function getOldSpecialAttributes (SimpleXMLElement $XMLPhonebook) {
-    if (!$XMLPhonebook || !$XMLPhonebook->phonebook) {
+function getOldSpecialAttributes(SimpleXMLElement $XMLPhonebook)
+{
+    if (!property_exists($XMLPhonebook, "phonebook")) {
         return [];
     }
 
     $specialAttributes = [];
-    foreach($XMLPhonebook->phonebook->contact as $contact)
-    {
+    foreach ($XMLPhonebook->phonebook->contact as $contact) {
         foreach ($contact->telephony->number as $number) {
             if ((isset($number->attributes()->quickdial) && $number->attributes()->quickdial >= 0)
                 || (isset($number->attributes()->vanity) && $number->attributes()->vanity != "")) {
-                    // build unique key: {normalized-phone-number}@{vCard UUID} mapping to attributes (quickdial, vanity)
-                    // normalizing means: remove all non-"+" and non-number characters like SPACE, MINUS, SLASH...
-                    $key = preg_replace("/[^\+0-9]/", "", $number)."@".$contact->carddav_uid;
-                    $specialAttributes[$key] = $number->attributes();
-                }
+                // build unique key: {normalized-phone-number}@{vCard UUID} mapping to attributes (quickdial, vanity)
+                // normalizing means: remove all non-"+" and non-number characters like SPACE, MINUS, SLASH...
+                $key = preg_replace("/[^\+0-9]/", "", $number)."@".$contact->carddav_uid;
+                $specialAttributes[$key] = $number->attributes();
+            }
         }
     }
     return $specialAttributes;
@@ -448,29 +448,29 @@ function getOldSpecialAttributes (SimpleXMLElement $XMLPhonebook) {
  * Restore special attributes in given target phone book
  *
  * @param   SimpleXMLElement    $XMLTargetPhoneBook
- * @param   array               [] or map with {phonenumber@CardDavUid}=>SimpleXMLElement-Attributes
+ * @param   array               $oldSpecialAttributes [] or map key => attributes
  * @return  SimpleXMLElement    out phonebook with restored special attributes
  */
-function restoreSpecialAttributes (SimpleXMLElement $XMLTargetPhoneBook, array $oldSpecialAttributes) {
+function restoreSpecialAttributes(SimpleXMLElement $XMLTargetPhoneBook, array $oldSpecialAttributes)
+{
     if (count($oldSpecialAttributes)==0) {
         return $XMLTargetPhoneBook;
     }
     echo "Restoring old special attributes (quickdial, vanity)\n";
-    foreach($XMLTargetPhoneBook->phonebook->contact as $contact)
-    {
+    foreach($XMLTargetPhoneBook->phonebook->contact as $contact) {
         foreach ($contact->telephony->number as $number) {
             // build unique key: {normalized-phone-number}@{vCard UUID} mapping to quick dial number
             // normalizing means: remove all non-"+" and non-number characters like SPACE, MINUS, SLASH...
             $key = preg_replace("/[^\+0-9]/", "", $number)."@".$contact->carddav_uid;
-            if(array_key_exists($key, $oldSpecialAttributes)) {
-                if(property_exists($oldSpecialAttributes[$key], "quickdial")){
+            if (array_key_exists($key, $oldSpecialAttributes)) {
+                if (property_exists($oldSpecialAttributes[$key], "quickdial")) {
                     if (!property_exists($number->attributes(), "quickdial")) {
                         $number->addAttribute("quickdial", $oldSpecialAttributes[$key]["quickdial"]);
                     } else {
                         $number["quickdial"] = $oldSpecialAttributes[$key]["quickdial"];
                     }
                 }
-                if(property_exists($oldSpecialAttributes[$key], "vanity")){
+                if (property_exists($oldSpecialAttributes[$key], "vanity")) {
                     if (!property_exists($number->attributes(), "vanity")) {
                         $number->addAttribute("vanity", $oldSpecialAttributes[$key]["vanity"]);
                     } else {
