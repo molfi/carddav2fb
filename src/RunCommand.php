@@ -84,7 +84,7 @@ class RunCommand extends Command
         }
 
         // fritzbox format
-        $XMLPhonebook = export($filtered, $this->config);
+        $xmlPhonebook = export($filtered, $this->config);
         error_log(sprintf(PHP_EOL."Converted %d vCard(s)", count($filtered)));
 
         if (!count($filtered)) {
@@ -95,7 +95,7 @@ class RunCommand extends Command
         // upload
         error_log("Uploading");
 
-        upload($XMLPhonebook, $this->config);
+        uploadPhonebook($xmlPhonebook, $this->config);
         error_log("Successful uploaded new Fritz!Box phonebook");
     }
 
