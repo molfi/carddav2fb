@@ -356,11 +356,11 @@ function xml_adopt(SimpleXMLElement $to, SimpleXMLElement $from)
 /**
  * Upload cards to fritzbox
  *
- * @param SimpleXMLElement  $xmlNewPhonebook
+ * @param SimpleXMLElement  $xmlPhonebook
  * @param array             $config
  * @return void
  */
-function uploadPhonebook(SimpleXMLElement $xmlNewPhonebook, array $config)
+function uploadPhonebook(SimpleXMLElement $xmlPhonebook, array $config)
 {
     $options = $config['fritzbox'];
 
@@ -369,10 +369,10 @@ function uploadPhonebook(SimpleXMLElement $xmlNewPhonebook, array $config)
     $fritz->mergeClientOptions($options['http'] ?? []);
     $fritz->login();
 
-    if (!phoneNumberAttributesSet($xmlNewPhonebook)) {
-        $XMLOldPhoneBook = downloadPhonebook($fritz, $config);
-        $oldSpecialAttributes = getPhoneNumberAttributes($XMLOldPhoneBook);
-        $xmlNewPhonebook = mergePhoneNumberAttributes($xmlNewPhonebook, $oldSpecialAttributes);
+    if (!phoneNumberAttributesSet($xmlPhonebook)) {
+        $xmlOldPhoneBook = downloadPhonebook($fritz, $config);
+        $attributes = getPhoneNumberAttributes($xmlOldPhoneBook);
+        $xmlPhonebook = mergePhoneNumberAttributes($xmlPhonebook, $attributes);
     } else {
         error_log("Note: Skipping automatic restore of quickdial/vanity attributes.");
         error_log("      Are you using X-FB-QUICKDIAL/X-FB-VANITY CardDav extensions?");
@@ -386,7 +386,7 @@ function uploadPhonebook(SimpleXMLElement $xmlNewPhonebook, array $config)
         'PhonebookImportFile' => [
             'type' => 'text/xml',
             'filename' => 'updatepb.xml',
-            'content' => $xmlNewPhonebook->asXML(), // convert XML object to XML string
+            'content' => $xmlPhonebook->asXML(), // convert XML object to XML string
         ]
     ];
 
@@ -398,7 +398,7 @@ function uploadPhonebook(SimpleXMLElement $xmlNewPhonebook, array $config)
 
 
 /**
- * Downloads the old phone book from Fritzbox
+ * Downloads the phone book from Fritzbox
  *
  * @param   Api   $fritz
  * @param   array $config
@@ -413,7 +413,7 @@ function downloadPhonebook(Api $fritz, array $config)
     ];
     $result = $fritz->postFile($formfields, []); // send the command to load existing phone book
     if (substr($result, 0, 5) !== "<?xml") {
-        error_log("ERROR: Could not load old phonebook with ID=".$config['phonebook']['id']);
+        error_log("ERROR: Could not load phonebook with ID=".$config['phonebook']['id']);
         return new SimpleXMLElement("<xml><empty /></xml>");
     }
     $xmlPhonebook = simplexml_load_string($result);
@@ -451,26 +451,27 @@ function getPhoneNumberAttributes(SimpleXMLElement $xmlPhonebook)
  * Restore special attributes (quickdial, vanity) in given target phone book
  *
  * @param   SimpleXMLElement    $xmlTargetPhoneBook
- * @param   array               $oldSpecialAttributes [] or map key => attributes
- * @return  SimpleXMLElement    out phonebook with restored special attributes
+ * @param   array               $attributes [] or map key => attributes
+ * @return  SimpleXMLElement    phonebook with restored special attributes
  */
-function mergePhoneNumberAttributes(SimpleXMLElement $xmlTargetPhoneBook, array $oldSpecialAttributes)
+function mergePhoneNumberAttributes(SimpleXMLElement $xmlTargetPhoneBook, array $attributes)
 {
-    if (!$oldSpecialAttributes) {
+    if (!$attributes) {
         return $xmlTargetPhoneBook;
     }
     error_log("Restoring old special attributes (quickdial, vanity)".PHP_EOL);
     foreach ($xmlTargetPhoneBook->phonebook->contact as $contact) {
         foreach ($contact->telephony->number as $number) {
             $key = generateUniqueKey($number, $contact->carddav_uid);
-            if (array_key_exists($key, $oldSpecialAttributes)) {
+            if (array_key_exists($key, $attributes)) {
                 foreach (['quickdial','vanity'] as $attribute) {
-                    if (property_exists($oldSpecialAttributes[$key], $attribute)) {
-                        if (!property_exists($number->attributes(), $attribute)) {
-                            $number->addAttribute($attribute, (string)$oldSpecialAttributes[$key]->$attribute);
-                        } else {
-                            $number[$attribute] = (string)$oldSpecialAttributes[$key]->$attribute;
-                        }
+                    if (property_exists($attributes[$key], $attribute)) {
+// TODO
+//                        if (!property_exists($number->attributes(), $attribute)) {
+//                            $number->addAttribute($attribute, (string)$attributes[$key]->$attribute);
+//                        } else {
+                            $number[$attribute] = (string)$attributes[$key]->$attribute;
+//                        }
                     }
                 }
             }
@@ -481,7 +482,7 @@ function mergePhoneNumberAttributes(SimpleXMLElement $xmlTargetPhoneBook, array 
 
 
 /**
- * Build unique key with normalized phone number to lookup old phonebook attributes
+ * Build unique key with normalized phone number to lookup phonebook attributes
  * normalizing number means: remove all non-"+" and non-number characters like SPACE, MINUS, SLASH...
  *
  * @param   string  $number
