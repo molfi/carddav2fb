@@ -466,12 +466,7 @@ function mergePhoneNumberAttributes(SimpleXMLElement $xmlTargetPhoneBook, array 
             if (array_key_exists($key, $attributes)) {
                 foreach (['quickdial','vanity'] as $attribute) {
                     if (property_exists($attributes[$key], $attribute)) {
-// TODO
-//                        if (!property_exists($number->attributes(), $attribute)) {
-//                            $number->addAttribute($attribute, (string)$attributes[$key]->$attribute);
-//                        } else {
-                            $number[$attribute] = (string)$attributes[$key]->$attribute;
-//                        }
+                        $number[$attribute] = (string)$attributes[$key]->$attribute;
                     }
                 }
             }
