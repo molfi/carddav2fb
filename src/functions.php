@@ -313,7 +313,7 @@ function filterMatches($attribute, $filterValues): bool
  * @param array $conversions
  * @return SimpleXMLElement     the XML phone book in Fritz Box format
  */
-function export(array $cards, array $conversions): SimpleXMLElement
+function exportPhonebook(array $cards, array $conversions): SimpleXMLElement
 {
     $xmlPhonebook = new SimpleXMLElement(
         <<<EOT
@@ -371,8 +371,10 @@ function uploadPhonebook(SimpleXMLElement $xmlPhonebook, array $config)
 
     if (!phoneNumberAttributesSet($xmlPhonebook)) {
         $xmlOldPhoneBook = downloadPhonebook($fritz, $config);
-        $attributes = getPhoneNumberAttributes($xmlOldPhoneBook);
-        $xmlPhonebook = mergePhoneNumberAttributes($xmlPhonebook, $attributes);
+        if ($xmlOldPhoneBook) {
+            $attributes = getPhoneNumberAttributes($xmlOldPhoneBook);
+            $xmlPhonebook = mergePhoneNumberAttributes($xmlPhonebook, $attributes);
+        }
     } else {
         error_log("Note: Skipping automatic restore of quickdial/vanity attributes.");
         error_log("      Are you using X-FB-QUICKDIAL/X-FB-VANITY CardDav extensions?");
@@ -402,7 +404,7 @@ function uploadPhonebook(SimpleXMLElement $xmlPhonebook, array $config)
  *
  * @param   Api   $fritz
  * @param   array $config
- * @return  SimpleXMLElement with the old existing phonebook
+ * @return  SimpleXMLElement|bool with the old existing phonebook
  */
 function downloadPhonebook(Api $fritz, array $config)
 {
@@ -414,7 +416,7 @@ function downloadPhonebook(Api $fritz, array $config)
     $result = $fritz->postFile($formfields, []); // send the command to load existing phone book
     if (substr($result, 0, 5) !== "<?xml") {
         error_log("ERROR: Could not load phonebook with ID=".$config['phonebook']['id']);
-        return new SimpleXMLElement("<xml><empty /></xml>");
+        return false;
     }
     $xmlPhonebook = simplexml_load_string($result);
     return $xmlPhonebook;
@@ -425,7 +427,7 @@ function downloadPhonebook(Api $fritz, array $config)
  * Get quickdial and vanity special attributes from given XML phone book
  *
  * @param   SimpleXMLElement    $xmlPhonebook
- * @return  mixed               [] or map with {phonenumber@CardDavUID}=>SimpleXMLElement-Attributes
+ * @return  array               [] or map with {phonenumber@CardDavUID}=>SimpleXMLElement-Attributes
  */
 function getPhoneNumberAttributes(SimpleXMLElement $xmlPhonebook)
 {

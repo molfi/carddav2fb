@@ -47,7 +47,7 @@ class ConvertCommand extends Command
         error_log(sprintf("Converted %d cards", count($filtered)));
 
         // convert
-        $xml = export($filtered, $this->config);
+        $xml = exportPhonebook($filtered, $this->config);
 
         echo $xml->asXML();
     }

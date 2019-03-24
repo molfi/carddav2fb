@@ -4,10 +4,6 @@ use \PHPUnit\Framework\TestCase;
 
 class FunctionsTest extends TestCase
 {
-    public function setUp()
-    {
-    }
-
     private function defaultPhonebook(): SimpleXMLElement
     {
         $xml =                 <<<EOD
@@ -51,15 +47,6 @@ EOD;
         $phonebook->phonebook->contact[$contIndex]->telephony->number[$numIndex]['vanity'] = $van;
         return $phonebook;
     }
-
-
-//                              _______        _      _____
-//                             |__   __|      | |    / ____|
-//       ______ ______ ______     | | ___  ___| |_  | |     __ _ ___  ___  ___   ______ ______ ______
-//      |______|______|______|    | |/ _ \/ __| __| | |    / _` / __|/ _ \/ __| |______|______|______|
-//                                | |  __/\__ \ |_  | |___| (_| \__ \  __/\__ \
-//                                |_|\___||___/\__|  \_____\__,_|___/\___||___/
-
 
     public function testGenerateUniqueKey()
     {

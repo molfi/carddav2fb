@@ -84,7 +84,7 @@ class RunCommand extends Command
         }
 
         // fritzbox format
-        $xmlPhonebook = export($filtered, $this->config);
+        $xmlPhonebook = exportPhonebook($filtered, $this->config);
         error_log(sprintf(PHP_EOL."Converted %d vCard(s)", count($filtered)));
 
         if (!count($filtered)) {
