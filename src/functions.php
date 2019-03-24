@@ -427,7 +427,7 @@ function downloadPhonebook(Api $fritz, array $config)
  * Get quickdial and vanity special attributes from given XML phone book
  *
  * @param   SimpleXMLElement    $xmlPhonebook
- * @return  array               [] or map with {phonenumber@CardDavUID}=>SimpleXMLElement-Attributes
+ * @return  mixed               [] or map with {phonenumber@CardDavUID}=>SimpleXMLElement-Attributes
  */
 function getPhoneNumberAttributes(SimpleXMLElement $xmlPhonebook)
 {
