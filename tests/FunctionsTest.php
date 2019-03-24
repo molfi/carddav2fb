@@ -4,9 +4,9 @@ use \PHPUnit\Framework\TestCase;
 
 class FunctionsTest extends TestCase
 {
-    private function defaultPhonebook(): SimpleXMLElement
+    public function defaultPhonebook(): array
     {
-        $xml =                 <<<EOD
+        $xml = <<<EOD
 <?xml version="1.0" encoding="UTF-8"?>
 <phonebooks>
     <phonebook name="Telefonbuch">
@@ -38,7 +38,9 @@ class FunctionsTest extends TestCase
 </phonebooks>
 EOD;
 
-        return simplexml_load_string($xml);
+        return [
+            [simplexml_load_string($xml)]
+        ];
     }
 
     private function injectQuickDialAndVanity(SimpleXMLElement $phonebook, $contIndex, $numIndex, $qd, $van): SimpleXMLElement
@@ -63,26 +65,32 @@ EOD;
                             'generateUniqueKey() should normalize phone numbers');
     }
 
-    public function testPhoneNumberAttributesSetFalse()
+    /**
+     * @dataProvider defaultPhonebook
+     */
+    public function testPhoneNumberAttributesSetFalse(SimpleXMLElement $default)
     {
-        $phonebook = $this->defaultPhonebook();
-        $this->assertEquals(false, Andig\phoneNumberAttributesSet($phonebook),
+        $this->assertEquals(false, Andig\phoneNumberAttributesSet($default),
                             'phoneNumberAttributesSet() should not detect any quickdial / vanity attributes');
     }
 
-    public function testPhoneNumberAttributesSetTrue()
+    /**
+     * @dataProvider defaultPhonebook
+     */
+    public function testPhoneNumberAttributesSetTrue(SimpleXMLElement $default)
     {
-        $phonebook = $this->defaultPhonebook();
-        $phonebook = $this->injectQuickDialAndVanity($phonebook, 0, 0, "11", "AX");
+        $phonebook = $this->injectQuickDialAndVanity($default, 0, 0, "11", "AX");
 
         $this->assertEquals(true, Andig\phoneNumberAttributesSet($phonebook),
                             'phoneNumberAttributesSet() should detect set quickdial / vanity attributes');
     }
 
-    public function testGetPhoneNumberAttributes()
+    /**
+     * @dataProvider defaultPhonebook
+     */
+    public function testGetPhoneNumberAttributes(SimpleXMLElement $default)
     {
-        $phonebook = $this->defaultPhonebook();
-        $phonebook = $this->injectQuickDialAndVanity($phonebook, 0, 0, "11", "AX");
+        $phonebook = $this->injectQuickDialAndVanity($default, 0, 0, "11", "AX");
 
         $attributes = Andig\getPhoneNumberAttributes($phonebook);
 
@@ -96,10 +104,12 @@ EOD;
         $this->assertEquals('AX', $attributes[$expectedKey]->vanity);
     }
 
-    public function testMergePhoneNumberAttributes()
+    /**
+     * @dataProvider defaultPhonebook
+     */
+    public function testMergePhoneNumberAttributes(SimpleXMLElement $default)
     {
-        $phonebook = $this->defaultPhonebook();
-        $phonebook = $this->injectQuickDialAndVanity($phonebook, 0, 0, "11", "AX");
+        $phonebook = $this->injectQuickDialAndVanity($default, 0, 0, "11", "AX");
         $phonebook = $this->injectQuickDialAndVanity($phonebook, 1, 1, "22", "AG");
 
         $attributes = Andig\getPhoneNumberAttributes($phonebook);
