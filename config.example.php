@@ -17,6 +17,9 @@ $config = [
             'http' => [           // http client options are directly passed to Guzzle http client
                 // 'verify' => false, // uncomment to disable certificate check
                 // 'auth' => 'digest', // uncomment for digest auth
+                'headers' => [
+                    'Content-Type' => 'application/xml',
+                ],
             ]
         ],
 /* add as many as you need

@@ -33,6 +33,13 @@ class Backend
     private $vcard_extension = '.vcf';
 
     /**
+     * DEV or CARDDAV request method
+     *
+     * @var string
+     */
+    private $method = 'REPORT';
+
+    /**
      * Progress callback
      * @var callable
      */
@@ -135,20 +142,37 @@ class Backend
      */
     public function getVcards(): array
     {
-        try {
-            $response = $this->getCachedClient()->request('REPORT', $this->url, [
-                'headers' => [
-                    'Content-Type' => 'application/xml',
-                ],
-                'body' => <<<EOD
+        if ($this->method == 'REPORT') {
+            $body = <<<EOD
 <?xml version="1.0" encoding="utf-8"?>
 <C:addressbook-query xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:carddav">
     <D:prop>
-        <D:getetag/>
         <C:address-data content-type="text/vcard"/>
+        <D:getetag/>
     </D:prop>
 </C:addressbook-query>
-EOD
+EOD;
+        } elseif ($this->method == 'PROPFIND') {
+            $body = <<<EOD
+<?xml version="1.0" encoding="utf-8"?>
+<D:propfind xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:carddav">
+    <D:prop>
+        <C:address-data content-type="text/vcard"/>
+        <D:getetag/>
+    </D:prop>
+</C:addressbook-query>
+EOD;
+        } else {
+            throw(new \Exception("Unexpected method " . $this->method));
+        }
+
+        try {
+            $client = $this->getCachedClient();
+            $response = $client->request($this->method, $this->url, [
+                'headers' => [
+                    'Content-Type' => 'application/xml',
+                ],
+                'body' => $body
             ]);
         } catch (RequestException $e) {
             if ($e->hasResponse() && 404 == $e->getResponse()->getStatusCode()) {
