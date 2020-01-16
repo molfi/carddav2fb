@@ -150,6 +150,7 @@ class Backend
         <C:address-data content-type="text/vcard"/>
         <D:getetag/>
     </D:prop>
+    <C:filter/>
 </C:addressbook-query>
 EOD;
         } elseif ($this->method == 'PROPFIND') {
