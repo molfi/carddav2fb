@@ -41,7 +41,10 @@ $config = [
         'http' => [                 // http client options are directly passed to Guzzle http client
             // 'verify' => false,   // uncomment to disable certificate check
         ],
-        'plainFTP' => false,        // set true to use FTP instead of FTPS e.g. on Windows
+        'ftp' => [
+            'plain' => false,       // set true to use FTP instead of FTPS e.g. on Windows
+            'disabled' => false,    // set true if your FRITZ!Box does not support ftp - e.g. 7412
+        ],
     ],
 
     'filters' => [
