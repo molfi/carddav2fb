@@ -7,7 +7,18 @@ This is a fork of https://github.com/andig/carddav2fb adjusted to personal needs
 - maybe more in the future ...
 
 ## Howto
-tbd
+- Create new container based on "andig/carddav2fb" - do not start it yet
+- Create folder structure on Synology and place needed files into it, e.g.
+  - /docker/carddav2fb/data
+  - /docker/carddav2fb/srv/src/CardDav/Backend.php
+  - /docker/carddav2fb/srv/docker-entrypoint
+- Configure Volume mappings
+  - /srv/src/CardDav/Backend.php --> /docker/carddav2fb/srv/src/CardDav/Backend.php
+  - /srv/docker-entrypoint --> /docker/carddav2fb/srv/docker-entrypoint
+  - /data --> /docker/carddav2fb/data
+- Start container
+- 
+
 
 ## License
 This script is released under Public Domain, some parts under GNU AGPL or MIT license. Make sure you understand which parts are which.
