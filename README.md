@@ -7,17 +7,22 @@ This is a fork of https://github.com/andig/carddav2fb adjusted to personal needs
 - maybe more in the future ...
 
 ## Howto
-- Create new container based on "andig/carddav2fb" - do not start it yet
-- Create folder structure on Synology and place needed files into it, e.g.
+- Create folder structure on Synology, e.g. ...
   - /docker/carddav2fb/data
+  - /docker/carddav2fb/srv/src/CardDav/
+- ... and place files of this master branch:
   - /docker/carddav2fb/srv/src/CardDav/Backend.php
   - /docker/carddav2fb/srv/docker-entrypoint
+  - /docker/carddav2fb/srv/config.example.cron
+- Create new container based on "andig/carddav2fb" - do not start it yet
 - Configure Volume mappings
   - /srv/src/CardDav/Backend.php --> /docker/carddav2fb/srv/src/CardDav/Backend.php
   - /srv/docker-entrypoint --> /docker/carddav2fb/srv/docker-entrypoint
+  - /srv/config.example.cron --> /docker/carddav2fb/srv/config.example.cron
   - /data --> /docker/carddav2fb/data
 - Start container
-- 
+- Copy config.example.cron to config.cron and config.example.php to config.php
+- Adjust both config files to own needs
 
 
 ## License
