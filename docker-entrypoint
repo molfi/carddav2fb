@@ -5,13 +5,20 @@ if [ ! -f "/data/config.php" ] ; then
     echo "No carddav2fb config found!"
     cp /srv/config.example.php /data/
     echo "Copied config.example.php to /data volume. Please edit and rename to config.php"
+	echo "For more than one phonebook please edit config.cron and copy config.php to e.g. config_1.php, config_2.php etc."
     exit 1
 fi
 if [ "$1" == "" ] ; then
     if [ -f "/data/config.cron" ] ; then
         . /data/config.cron
         while true ; do
-            /srv/carddav2fb run $RUN_OPTIONS
+		    i=1
+            while [ $i -le $PHONEBOOKS  ]; do
+                eval arg=\$RUN_OPTIONS_$i
+            	srv/carddav2fb run $arg
+		    	sleep $WAIT
+               	i=`expr $i + 1`	
+            done
             sleep $INTERVAL
         done
         exit 0
