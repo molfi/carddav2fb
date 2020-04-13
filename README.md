@@ -20,9 +20,22 @@ This is a fork of https://github.com/andig/carddav2fb adjusted to personal needs
   - /srv/docker-entrypoint --> /docker/carddav2fb/srv/docker-entrypoint
   - /srv/config.example.cron --> /docker/carddav2fb/srv/config.example.cron
   - /data --> /docker/carddav2fb/data
-- Start container
-- Copy config.example.cron to config.cron and config.example.php to config.php
-- Adjust both config files to own needs
+- Start container. Protocol should show error messages and go into endless loop
+  - "Copied config.example.php to /data volume. Please edit and rename to config.php"
+  - "For more than one phonebook please copy config.php to e.g. config_1.php, config_2.php etc. and later adjust config.cron"
+- Copy config.example.php to config.php and adjust to own needs
+- Protocol should show next error message while still looping
+  - "No cron config found!"
+  - "Copied config.example.cron to /data volume. Please edit and rename to config.cron"
+- Copy config.example.cron to config.cron and adjust to own needs
+- Protocol should show Success message:
+  - "Successful uploaded new FRITZ!Box phonebook"
+- To be able to handle more than one phonebook please proceed adjusting config.cron:
+  - Adjust number of PHONEBOOKS
+  - Adjust RUN_OPTIONs options for carddav2fb runs
+  - If needed adjust WAIT time and execution INTERVAL
+
+.... there is for sure a better way to achieve this ... 
 
 
 ## License
