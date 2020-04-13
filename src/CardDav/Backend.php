@@ -147,6 +147,7 @@ class Backend
         <D:getetag/>
         <C:address-data content-type="text/vcard"/>
     </D:prop>
+    <C:filter/>
 </C:addressbook-query>
 EOD
             ]);
@@ -162,6 +163,10 @@ EOD
 
         $cards = [];
         $body = $this->stripNamespaces((string)$response->getBody());
+        if (strpos($body, "<'>")) {
+            $body = str_replace("<ietf:params:xml:ns:carddav'>", "<address-data>", $body);
+            $body = str_replace("<'>", "<multistatus>", $body);
+        }
         $xml = new \SimpleXMLElement($body);
 
         // NOTE: instead of stripping the namespaces they could also be queried using xpath:
