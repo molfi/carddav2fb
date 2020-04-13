@@ -30,12 +30,15 @@ This is a fork of https://github.com/andig/carddav2fb adjusted to personal needs
 - Copy config.example.cron to config.cron and adjust to own needs
 - Protocol should show Success message:
   - "Successful uploaded new FRITZ!Box phonebook"
-- To be able to handle more than one phonebook please proceed adjusting config.cron:
-  - Adjust number of PHONEBOOKS
-  - Adjust RUN_OPTIONs options for carddav2fb runs
+- To be able to handle more than one phonebook please proceed creating more config files as stated above and adjusting config.cron:
+  - Number of PHONEBOOKS
+  - RUN_OPTIONs options for carddav2fb runs
   - If needed adjust WAIT time and execution INTERVAL
 
-.... there is for sure a better way to achieve this ... 
+Here you can find commands and options of carddav2fb:
+https://github.com/blacksenator/carddav2fb/wiki/Kommandos-und-Optionen-zum-Programmaufruf
+
+.... there is for sure a better way to achieve this ... but for me it was a good excercise ...
 
 
 ## License
