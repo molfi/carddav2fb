@@ -5,7 +5,7 @@ if [ ! -f "/data/config.php" ] ; then
     echo "No carddav2fb config found!"
     cp /srv/config.example.php /data/
     echo "Copied config.example.php to /data volume. Please edit and rename to config.php"
-	echo "For more than one phonebook please edit config.cron and copy config.php to e.g. config_1.php, config_2.php etc."
+	echo "For more than one phonebook please copy config.php to e.g. config_1.php, config_2.php etc. and later adjust config.cron"
     exit 1
 fi
 if [ "$1" == "" ] ; then
