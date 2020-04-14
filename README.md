@@ -2,6 +2,8 @@
 This is a fork of https://github.com/andig/carddav2fb adjusted to personal needs. Maybe its interesting for others as well.
 
 ## Features
+- All features of original https://github.com/andig/carddav2fb as of fork day
+PLUS
 - Make carddav2fb work with Synology Diskstation package "CardDAV Server" (https://github.com/andig/carddav2fb/issues/167)
 - Enhance solution for Docker to handle multiple phonebooks in one container (https://github.com/andig/carddav2fb/pull/141)
 - maybe more in the future ...
